@@ -1,0 +1,20 @@
+<header class="top-bar">
+    <div class="home-wrapper">
+        <a href="{{ url_for('index') }}" class="user-role" style="margin-right: 20px;">Головна</a>
+        <a href="{{ url_for('dictionaries') }}" class="user-role" style="margin-right: 20px;">Довідники</a>
+        <a href="{{ url_for('global_history') }}" class="user-role">Журнал подій</a>
+    </div>
+
+    <div class="user">
+        <div class="user-profile-wrapper" style="display: flex; align-items: center; gap: 10px;">
+            <div class="icon">
+                <img src="{{ url_for('static', filename='user-icon.png') }}" alt="User Icon" style="display: block;">
+            </div>
+            <a class="user-role" href="{{ url_for('users') }}">{{ session.get('username', 'USER') }}</a>
+        </div>
+
+        <nav class="user-menu">
+            <a href="{{ url_for('logout') }}">Вийти</a>
+        </nav>
+    </div>
+</header>

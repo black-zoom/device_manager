@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Вхід у систему</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="user">
+        <div class="icon">
+            <img src="{{ url_for('static', filename='user-icon.png') }}" alt="Іконка користувача">
+        </div>
+    </div>
+</header>
+
+<div class="grid-background"></div>
+
+<main class="login-box">
+    <h2>Вхід</h2>
+    <form method="POST" action="{{ url_for('login') }}">
+        
+        <div class="input-group">
+            <label for="username">Користувач:</label>
+            <input type="text" id="username" name="username" placeholder="Введіть ім’я користувача" required>
+        </div>
+
+        <div class="input-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" placeholder="Введіть пароль" required>
+        </div>
+
+        <button type="submit">Увійти</button>
+
+        {% if get_flashed_messages() %}
+        <ul class="login-message">
+            {% for category, message in get_flashed_messages(with_categories=True) %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+    </form>
+</main>
+
+</body>
+</html>

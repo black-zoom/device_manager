@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Довідники</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body class="dict-page"> 
+
+{% include 'header.html' %}
+
+<div class="container dict-container"> 
+    <div class="filter-panel">
+        <h3>Підрозділи</h3>
+        <form action="/dict/save" method="POST" class="filter-form">
+            <input type="hidden" name="type" value="department">
+            <input type="hidden" name="action" value="save">
+            <input type="text" name="name" placeholder="Новий підрозділ..." required>
+            <button type="submit" class="btn-add">+ Додати</button>
+        </form>
+        
+        <table class="device-table">
+            <thead>
+                <tr><th>ID</th><th>Назва</th><th>Статус</th><th>Дія</th></tr>
+            </thead>
+            <tbody>
+                {% for item in departments %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>
+                        <form action="/dict/save" method="POST" class="inline-edit-form">
+                            <input type="hidden" name="type" value="department">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="save">
+                            <input type="text" name="name" value="{{ item.name }}" required>
+                            <button type="submit" class="btn-outline">Save</button>
+                        </form>
+                    </td>
+                    <td><span class="status-badge {{ 'status-active' if item.is_active else 'status-archived' }}">{{ 'Активний' if item.is_active else 'Архів' }}</span></td>
+                    <td>
+                        <form action="/dict/save" method="POST" style="display:inline;">
+                            <input type="hidden" name="type" value="department">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="toggle">
+                            <button type="submit" class="btn-outline">
+                                {{ 'В архів' if item.is_active else 'Відновити' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="filter-panel">
+        <h3>Типи пристроїв</h3>
+        <form action="/dict/save" method="POST" class="filter-form">
+            <input type="hidden" name="type" value="device_type">
+            <input type="hidden" name="action" value="save">
+            <input type="text" name="name" placeholder="Новий тип..." required>
+            <button type="submit" class="btn-add">+ Додати</button>
+        </form>
+        
+        <table class="device-table">
+            <thead>
+                <tr><th>ID</th><th>Назва</th><th>Статус</th><th>Дія</th></tr>
+            </thead>
+            <tbody>
+                {% for item in device_types %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>
+                        <form action="/dict/save" method="POST" class="inline-edit-form">
+                            <input type="hidden" name="type" value="device_type">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="save">
+                            <input type="text" name="name" value="{{ item.name }}" required>
+                            <button type="submit" class="btn-outline">Save</button>
+                        </form>
+                    </td>
+                    <td><span class="status-badge {{ 'status-active' if item.is_active else 'status-archived' }}">{{ 'Активний' if item.is_active else 'Архів' }}</span></td>
+                    <td>
+                        <form action="/dict/save" method="POST" style="display:inline;">
+                            <input type="hidden" name="type" value="device_type">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="toggle">
+                            <button type="submit" class="btn-outline">
+                                {{ 'В архів' if item.is_active else 'Відновити' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="filter-panel">
+        <h3>Виконавці</h3>
+        <form action="/dict/save" method="POST" class="filter-form">
+            <input type="hidden" name="type" value="crew"> 
+            <input type="hidden" name="action" value="save">
+            <input type="text" name="name" placeholder="Новий виконавець..." required>
+            <button type="submit" class="btn-add">+ Додати</button>
+        </form>
+        
+        <table class="device-table">
+            <thead>
+                <tr><th>ID</th><th>Назва</th><th>Статус</th><th>Дія</th></tr>
+            </thead>
+            <tbody>
+                {% for item in crews %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>
+                        <form action="/dict/save" method="POST" class="inline-edit-form">
+                            <input type="hidden" name="type" value="crew">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="save">
+                            <input type="text" name="name" value="{{ item.name }}" required>
+                            <button type="submit" class="btn-outline">Save</button>
+                        </form>
+                    </td>
+                    <td><span class="status-badge {{ 'status-active' if item.is_active else 'status-archived' }}">{{ 'Активний' if item.is_active else 'Архів' }}</span></td>
+                    <td>
+                        <form action="/dict/save" method="POST" style="display:inline;">
+                            <input type="hidden" name="type" value="crew">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="toggle">
+                            <button type="submit" class="btn-outline">
+                                {{ 'В архів' if item.is_active else 'Відновити' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="filter-panel">
+        <h3>Статуси пристроїв</h3>
+        <form action="/dict/save" method="POST" class="filter-form">
+            <input type="hidden" name="type" value="status"> 
+            <input type="hidden" name="action" value="save">
+            <input type="text" name="name" placeholder="Новий статус..." required>
+            <button type="submit" class="btn-add">+ Додати</button>
+        </form>
+        
+        <table class="device-table">
+            <thead>
+                <tr><th>ID</th><th>Назва</th><th>Статус</th><th>Дія</th></tr>
+            </thead>
+            <tbody>
+                {% for item in statuses %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>
+                        <form action="/dict/save" method="POST" class="inline-edit-form">
+                            <input type="hidden" name="type" value="status">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="save">
+                            <input type="text" name="name" value="{{ item.name }}" required>
+                            <button type="submit" class="btn-outline">Save</button>
+                        </form>
+                    </td>
+                    <td><span class="status-badge {{ 'status-active' if item.is_active else 'status-archived' }}">{{ 'Активний' if item.is_active else 'Архів' }}</span></td>
+                    <td>
+                        <form action="/dict/save" method="POST" style="display:inline;">
+                            <input type="hidden" name="type" value="status">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="toggle">
+                            <button type="submit" class="btn-outline">
+                                {{ 'В архів' if item.is_active else 'Відновити' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="filter-panel full-width">
+        <h3>Причини деактивації</h3>
+        <form action="/dict/save" method="POST" class="filter-form">
+            <input type="hidden" name="type" value="deactivation_reason"> 
+            <input type="hidden" name="action" value="save">
+            <input type="text" name="name" placeholder="Нова причина..." required class="wide-input">
+            <button type="submit" class="btn-add">+ Додати</button>
+        </form>
+        
+        <table class="device-table">
+            <thead>
+                <tr><th>ID</th><th>Назва</th><th>Статус</th><th>Дія</th></tr>
+            </thead>
+            <tbody>
+                {% for item in deactivation_reasons %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>
+                        <form action="/dict/save" method="POST" class="inline-edit-form">
+                            <input type="hidden" name="type" value="deactivation_reason">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="save">
+                            <input type="text" name="name" value="{{ item.name }}" required>
+                            <button type="submit" class="btn-outline">Save</button>
+                        </form>
+                    </td>
+                    <td><span class="status-badge {{ 'status-active' if item.is_active else 'status-archived' }}">{{ 'Активний' if item.is_active else 'Архів' }}</span></td>
+                    <td>
+                        <form action="/dict/save" method="POST" style="display:inline;">
+                            <input type="hidden" name="type" value="deactivation_reason">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="toggle">
+                            <button type="submit" class="btn-outline">
+                                {{ 'В архів' if item.is_active else 'Відновити' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
+

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Користувачі</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+
+{% include 'header.html' %}
+
+<div class="grid-background"></div>
+
+<main class="user-management">
+    <h2>Користувачі</h2>
+
+    <div class="search-bar">
+        <form method="GET" action="{{ url_for('users') }}"">
+            <input type="text" name="q" placeholder="Пошук" value="{{ request.args.get('q', '') }}">
+        </form>
+        <button type="button" onclick="window.location.href='{{ url_for('register') }}'">Додати користувача</button>
+    </div>
+    
+    <div class="user-list">
+        {% if users %}
+            {% for user in users %}
+                <div>
+                    <span>{{ user.username }}</span>
+                    <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" 
+                          onsubmit="return confirm('Are you sure you want to delete this user?');">
+                        <button type="submit">Видалити</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Користувач не знайдений</p>
+        {% endif %}
+    </div>
+</main>
+
+</body>
+</html>

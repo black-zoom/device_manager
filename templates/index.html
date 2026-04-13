@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Головна</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+
+{% include 'header.html' %}
+
+<div>
+    <div class="top-actions">
+        <button id="toggleFilterBtn" class="btn-outline">
+            Фільтри та Статистика ▾
+        </button>
+        <a href="{{ url_for('export_csv', **request.args) }}" class="btn-outline" style="text-decoration: none; display: inline-flex; align-items: center;">
+            Експорт (CSV)
+        </a>
+        <button onclick="openModal(null)" class="btn-outline">
+            + Додати пристрій
+        </button>
+    </div>
+    
+    <div class="filter-panel {% if current_filters %}active{% endif %}" id="filterPanel">
+        <div class="filter-stats-container">
+            <div class="stat-card">
+                <span class="stat-label">Знайдено</span>
+                <span class="stat-number">{{ filtered_count }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Відсоток</span>
+                <span class="stat-number">{{ percentage }}%</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Загальна база</span>
+                <span class="stat-number">{{ total_devices }}</span>
+            </div>
+        </div>
+
+        <form method="GET" action="{{ url_for('index') }}" class="filter-form">
+            <div class="filter-group">
+                <label>Період</label>
+                <select name="period" onchange="this.form.submit()">
+                    <option value="">Увесь час</option>
+                    <option value="day" {% if request.args.get('period') == 'day' %}selected{% endif %}>Сьогодні</option>
+                    <option value="week" {% if request.args.get('period') == 'week' %}selected{% endif %}>Тиждень</option>
+                    <option value="month" {% if request.args.get('period') == 'month' %}selected{% endif %}>Місяць</option>
+                    <option value="year" {% if request.args.get('period') == 'year' %}selected{% endif %}>Рік</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Статус</label>
+                <select name="status_id">
+                    <option value="">Усі статуси</option>
+                    {% for status in statuses %}
+                        <option value="{{ status.id }}" {% if current_filters.get('status_id') == status.id|string %}selected{% endif %}>
+                            {{ status.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Підрозділ</label>
+                <select name="department_id">
+                    <option value="">Усі підрозділи</option>
+                    {% for dep in departments %}
+                        <option value="{{ dep.id }}" {% if current_filters.get('department_id') == dep.id|string %}selected{% endif %}>
+                            {{ dep.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Виконавець</label>
+                <select name="crew_id">
+                    <option value="">Усі виконавці</option>
+                    {% for crew in crews %}
+                        <option value="{{ crew.id }}" {% if current_filters.get('crew_id') == crew.id|string %}selected{% endif %}>
+                            {{ crew.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Встановлено від</label>
+                <input type="date" name="install_date_from" value="{{ current_filters.get('install_date_from', '') }}">
+            </div>
+
+            <div class="filter-group">
+                <label>Встановлено до</label>
+                <input type="date" name="install_date_to" value="{{ current_filters.get('install_date_to', '') }}">
+            </div>
+            <div class="filter-group">
+                <label>Дія</label>
+                <a href="{{ url_for('index', show_archived='false' if is_archive_mode else 'true', 
+                           period=request.args.get('period', ''), 
+                           status_id=request.args.get('status_id', ''),
+                           department_id=request.args.get('department_id', ''),
+                           crew_id=request.args.get('crew_id', '')) }}" 
+                   class="btn-outline" style="text-decoration: none;">
+                    {{ "До активних" if is_archive_mode else "В архів" }}
+                </a>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn-apply">Застосувати</button>
+                <a href="{{ url_for('index') }}" class="btn-clear">Очистити</a>
+            </div>
+        </form>
+    </div>
+            
+    <div class="table-wrapper">
+        <table class="main-device-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>№</th>
+                    <th>Тип</th>
+                    <th>Підрозділ</th>
+                    <th>Статус</th>
+                    <th>Виконавець</th>
+                    <th>Локація</th>
+                    <th>Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in devices %}
+                <tr onclick="openModal({{ d.id }})">
+                    <td class="text-muted">{{ d.id }}</td>
+                    <td class="fw-bold">{{ d.full_number }}</td>
+                    <td>{{ d.device_type.name if d.device_type else '-' }}</td>
+                    <td>{{ d.department.name if d.department else '-' }}</td>
+                    <td>
+                        <span class="status-pill {% if d.status_id == 1 %}pill-active{% elif d.status_id == 2 %}pill-work{% else %}pill-archived{% endif %}">
+                            {{ d.status.name if d.status else '-' }}
+                        </span>
+                    </td>
+                    <td>{{ d.crew.name if d.crew else '-' }}</td>
+                    <td>{{ d.location }}</td>
+                    <td class="text-nowrap">{{ d.install_date.strftime('%d.%m.%Y') if d.install_date else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="deviceModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">Картка пристрою</h2>
+        
+        <form id="deviceForm" method="POST" action="{{ url_for('save_device') }}">
+            <input type="hidden" name="id" id="modal_id">
+
+            <div id="base_number_section" class="input-group">
+                <label>Базовий № прошивки (0-999)</label>
+                <input type="number" name="base_number" id="base_number_input" min="0" max="999" value="1">
+                <small class="text-muted">Система автоматично призначить наступний доступний суфікс (напр. 001-16)</small>
+            </div>
+
+            <div class="input-group">
+                <label>Повний ID/№</label>
+                <input type="text" id="full_number_input" readonly class="readonly-input">
+            </div>
+
+            <div class="input-group">
+                <label>Тип</label>
+                <select name="device_type_id" id="device_type_id_input">
+                    {% for t in device_types %}
+                    <option value="{{ t.id }}">{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Підрозділ</label>
+                <select name="department_id" id="department_id_input">
+                    {% for d in departments %}
+                    <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Статус</label>
+                <select name="status_id" id="status_id_input">
+                    {% for s in statuses %}
+                    <option value="{{ s.id }}">{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Виконавець</label>
+                <select name="crew_id" id="crew_id_input">
+                    {% for c in crews %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Локація</label>
+                <input type="text" name="location" id="location_input">
+            </div>
+
+            <div class="input-group">
+                <label>Дата виготовлення</label>
+                <input type="date" name="manufacture_date" id="manufacture_date_input">
+            </div>
+
+            <div class="input-group">
+                <label>Дата встановлення</label>
+                <input type="date" name="install_date" id="install_date_input">
+            </div>
+            
+            <div class="input-group">
+                <label>Дата деактивації</label>
+                <input type="date" name="deactivation_date" id="deactivation_date_input">
+            </div>
+
+            <div class="input-group">
+                <label>Причина деактивації</label>
+                <select name="deactivation_reason_id" id="deactivation_reason_id_input">
+                    <option value="">-- Не вказано --</option>
+                    {% for r in deactivation_reasons %}
+                    <option value="{{ r.id }}">{{ r.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Коментар</label>
+                <textarea name="comment" id="comment_input"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn-save">Зберегти</button>
+                <button type="button" id="deleteDeviceBtn" class="btn-delete">Видалити</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById("deviceModal");
+    const form = document.getElementById("deviceForm");
+    const deleteBtn = document.getElementById("deleteDeviceBtn");
+    const baseSection = document.getElementById("base_number_section");
+
+    function openModal(id) {
+        modal.style.display = "flex"; 
+        form.reset();
+        document.getElementById("modal_id").value = id ? id : "";
+        
+        if (id) {
+            document.getElementById("modalTitle").innerText = "Редагування пристрою";
+            deleteBtn.style.display = "block";
+            // При редагуванні ховаємо вибір базового номера, щоб не порушити унікальність
+            baseSection.style.display = "none";
+
+            fetch(`/device/${id}`)
+                .then(r => r.json())
+                .then(data => {
+                    // 1. Заповнюємо всі поля форми
+                    Object.keys(data).forEach(key => {
+                        const el = document.getElementById(`${key}_input`);
+                        if (el) el.value = data[key] || '';
+                    });
+                    document.getElementById("full_number_input").value = data.full_number;
+
+                    // 2. Логіка для кнопки "Видалити" / "Відновити"
+                    if (data.is_archived) {
+                        deleteBtn.innerText = "Повернути з архіву";
+                        deleteBtn.className = "btn-restore";
+                        
+                        deleteBtn.onclick = () => {
+                            if (confirm("Повернути цей пристрій до активних?")) {
+                                const f = document.createElement('form');
+                                f.method = 'POST';
+                                f.action = `/devices/${id}/restore`; // Маршрут для відновлення
+                                document.body.appendChild(f);
+                                f.submit();
+                            }
+                        };
+                    } else {
+                        deleteBtn.innerText = "Видалити";
+                        deleteBtn.className = "btn-delete";
+                        
+                        deleteBtn.onclick = () => {
+                            if (confirm("Ви впевнені, що хочете перемістити цей пристрій в архів?")) {
+                                const f = document.createElement('form');
+                                f.method = 'POST';
+                                f.action = `/devices/${id}/delete`; // Маршрут для архівації
+                                document.body.appendChild(f);
+                                f.submit();
+                            }
+                        };
+                    }
+                });
+        } else {
+            document.getElementById("modalTitle").innerText = "Новий пристрій";
+            deleteBtn.style.display = "none";
+            // Показуємо вибір номера тільки для нового пристрою
+            baseSection.style.display = "block";
+            document.getElementById("full_number_input").value = "Генерується автоматично";
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("install_date_input").value = today;
+        }
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    document.getElementById("toggleFilterBtn")?.addEventListener("click", function() {
+        const panel = document.getElementById("filterPanel");
+        panel.classList.toggle("active");
+        this.innerHTML = panel.classList.contains("active") 
+            ? "Фільтри та Статистика <span>▴</span>" 
+            : "Фільтри та Статистика <span>▾</span>";
+    });
+</script>
+
+</body>
+</html>

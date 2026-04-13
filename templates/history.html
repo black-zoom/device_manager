@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Журнал усіх подій</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+
+{% include 'header.html' %}
+
+<div>
+    <div class="top-actions">
+        <button onclick="window.print()" class="btn-outline">
+            Друк
+        </button>
+        <a href="{{ url_for('index') }}" class="btn-outline" style="text-decoration: none; display: inline-flex; align-items: center;">
+            Назад до списку
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="main-device-table">
+            <thead>
+                <tr>
+                    <th>Дата та час</th>
+                    <th>Пристрій (№)</th>
+                    <th>Користувач</th>
+                    <th>Дія</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in history_logs %}
+                <tr>
+                    <td style="white-space: nowrap;">{{ log.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td style="font-weight: bold;">
+                        {% if log.device %}
+                            {{ log.device.full_number }}
+                        {% else %}
+                            <span style="color: var(--accent-red);">Видалено (ID: {{ log.device_id }})</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ log.username }}</td>
+                    <td style="color: #aaa;">{{ log.action }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 20px; color: #777;">
+                        Журнал подій порожній.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
